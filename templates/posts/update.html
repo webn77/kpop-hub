@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}글 수정 | KPOP HUB{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <h1 class="text-xl font-bold text-gray-800 mb-6">✏️ 글 수정</h1>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form|crispy }}
+      {% if object.image %}
+        <div class="mt-2 mb-4">
+          <p class="text-xs text-gray-400 mb-1">현재 이미지:</p>
+          <img src="{{ object.image.url }}"
+               alt="현재 이미지"
+               class="h-24 object-cover rounded-lg">
+        </div>
+      {% endif %}
+      <div class="flex gap-3 justify-end mt-6">
+        <a href="{% url 'posts:detail' object.pk %}"
+           class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
+          취소
+        </a>
+        <button type="submit"
+                class="bg-purple-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition">
+          수정 완료
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

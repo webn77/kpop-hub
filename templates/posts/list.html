@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}소통 공간 | KPOP HUB{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-6">
+  <h1 class="text-2xl font-bold text-gray-800">💬 소통 공간</h1>
+  {% if user.is_authenticated %}
+    <a href="{% url 'posts:create' %}"
+       class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition text-sm font-medium">
+      + 글쓰기
+    </a>
+  {% endif %}
+</div>
+
+{% if posts %}
+  <div class="space-y-4">
+    {% for post in posts %}
+    <article class="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden">
+      <a href="{% url 'posts:detail' post.pk %}" class="block p-5">
+        <div class="flex gap-4">
+          {% if post.image %}
+            <div class="flex-shrink-0">
+              <img src="{{ post.image.url }}"
+                   alt="썸네일"
+                   class="w-20 h-20 object-cover rounded-lg">
+            </div>
+          {% endif %}
+          <div class="flex-1 min-w-0">
+            <h2 class="font-semibold text-gray-900 text-lg truncate">{{ post.title }}</h2>
+            <p class="text-gray-500 text-sm mt-1 line-clamp-2">{{ post.content|truncatechars:100 }}</p>
+            <div class="flex items-center gap-3 mt-3 text-xs text-gray-400">
+              <span class="font-medium text-gray-600">
+                {{ post.author.nickname|default:post.author.username }}
+              </span>
+              <span>{{ post.created_at|date:"Y.m.d" }}</span>
+              <span>❤ {{ post.like_count }}</span>
+              <span>💬 {{ post.comment_count }}</span>
+              <span>👁 {{ post.view_count }}</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    </article>
+    {% endfor %}
+  </div>
+
+  <!-- 페이지네이션 -->
+  {% if is_paginated %}
+  <div class="flex justify-center gap-2 mt-8">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}"
+         class="px-3 py-1 rounded border text-sm hover:bg-purple-50">이전</a>
+    {% endif %}
+    {% for num in paginator.page_range %}
+      {% if page_obj.number == num %}
+        <span class="px-3 py-1 rounded border bg-purple-600 text-white text-sm">{{ num }}</span>
+      {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <a href="?page={{ num }}"
+           class="px-3 py-1 rounded border text-sm hover:bg-purple-50">{{ num }}</a>
+      {% endif %}
+    {% endfor %}
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}"
+         class="px-3 py-1 rounded border text-sm hover:bg-purple-50">다음</a>
+    {% endif %}
+  </div>
+  {% endif %}
+
+{% else %}
+  <div class="text-center py-20 text-gray-400">
+    <p class="text-4xl mb-4">📝</p>
+    <p class="text-lg">아직 게시글이 없습니다.</p>
+    {% if user.is_authenticated %}
+      <a href="{% url 'posts:create' %}"
+         class="mt-4 inline-block bg-purple-600 text-white px-5 py-2 rounded-lg hover:bg-purple-700 transition text-sm">
+        첫 글 작성하기
+      </a>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

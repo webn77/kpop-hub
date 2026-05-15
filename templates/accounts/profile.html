@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}프로필 — KPOP HUB{% endblock %}
+
+{% block content %}
+<div class="flex justify-center items-start pt-8">
+  <div class="w-full max-w-lg bg-white rounded-2xl shadow-lg overflow-hidden">
+
+    <!-- 카드 헤더 -->
+    <div class="bg-violet-600 px-8 py-6 text-center">
+      <!-- 프로필 이미지 -->
+      <div class="w-20 h-20 rounded-full bg-violet-300 mx-auto mb-3 flex items-center justify-center overflow-hidden">
+        {% if user.profile_img %}
+          <img src="{{ user.profile_img.url }}" alt="프로필" class="w-full h-full object-cover">
+        {% else %}
+          <span class="text-3xl text-violet-700 font-bold">
+            {{ user.nickname|first|default:user.username|first|upper }}
+          </span>
+        {% endif %}
+      </div>
+      <h1 class="text-xl font-bold text-white">{{ user.nickname|default:user.username }}</h1>
+      <p class="text-violet-200 text-sm mt-1">{{ user.email }}</p>
+    </div>
+
+    <!-- 가입일 / 역할 정보 -->
+    <div class="px-8 pt-5 pb-2 flex gap-6 text-sm text-gray-500 border-b">
+      <div>
+        <span class="font-medium text-gray-700">가입일</span>
+        <span class="ml-2">{{ user.created_at|date:"Y년 m월 d일" }}</span>
+      </div>
+      <div>
+        <span class="font-medium text-gray-700">역할</span>
+        <span class="ml-2">{{ user.get_role_display }}</span>
+      </div>
+    </div>
+
+    <!-- 프로필 수정 폼 -->
+    <form method="post" enctype="multipart/form-data" class="px-8 py-6 space-y-4">
+      {% csrf_token %}
+
+      {% if form.errors %}
+        <div class="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-700">
+          {% for field in form %}
+            {% for error in field.errors %}
+              <p>{{ field.label }}: {{ error }}</p>
+            {% endfor %}
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">닉네임</label>
+        <input
+          type="text"
+          name="nickname"
+          value="{{ form.nickname.value|default:'' }}"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+          placeholder="닉네임"
+        >
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">자기소개</label>
+        <textarea
+          name="bio"
+          rows="3"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+          placeholder="자기소개를 입력하세요"
+        >{{ form.bio.value|default:'' }}</textarea>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">프로필 이미지</label>
+        <input
+          type="file"
+          name="profile_img"
+          accept="image/*"
+          class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+        >
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <button
+          type="submit"
+          class="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-semibold py-2 rounded-lg transition"
+        >
+          저장
+        </button>
+        <a
+          href="/"
+          class="flex-1 text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 rounded-lg transition"
+        >
+          취소
+        </a>
+      </div>
+    </form>
+
+    <!-- 로그아웃 -->
+    <div class="px-8 pb-6">
+      <form method="post" action="{% url 'accounts:logout' %}">
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="w-full border border-red-300 text-red-600 hover:bg-red-50 font-medium py-2 rounded-lg transition text-sm"
+        >
+          로그아웃
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% if polls %}
+  <div class="space-y-4">
+    {% for poll in polls %}
+    <a href="{% url 'polls:detail' poll.pk %}" class="block bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition">
+      <div class="flex items-start justify-between gap-3">
+        <div class="flex-1 min-w-0">
+          <h2 class="text-base font-semibold text-gray-800 truncate">{{ poll.title }}</h2>
+          {% if poll.description %}
+          <p class="text-sm text-gray-500 mt-1 line-clamp-2">{{ poll.description }}</p>
+          {% endif %}
+        </div>
+        {% if poll.is_active %}
+          <span class="shrink-0 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">진행 중</span>
+        {% else %}
+          <span class="shrink-0 text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full font-medium">종료</span>
+        {% endif %}
+      </div>
+      <div class="mt-3 flex items-center gap-4 text-xs text-gray-400">
+        <span>총 {{ poll.total_votes }}표</span>
+        <span>{{ poll.choices.count }}개 항목</span>
+        <span>마감 {{ poll.end_date|date:"Y-m-d H:i" }}</span>
+        {% if poll.is_multiple %}
+        <span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded">복수선택</span>
+        {% endif %}
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="text-center py-16 text-gray-400 text-sm">{{ empty_msg }}</div>
+{% endif %}

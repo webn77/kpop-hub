@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}투표 — KPOP HUB{% endblock %}
+
+{% block content %}
+<div class="mb-6">
+  <h1 class="text-2xl font-bold text-gray-800">투표</h1>
+  <p class="text-sm text-gray-500 mt-1">K-POP 팬들의 다양한 투표에 참여해보세요.</p>
+</div>
+
+<!-- 탭 -->
+<div class="flex gap-2 mb-6 border-b border-gray-200">
+  <a href="?tab=active"
+     class="px-4 py-2 text-sm font-medium border-b-2 transition
+       {% if tab == 'active' %}border-purple-600 text-purple-700{% else %}border-transparent text-gray-500 hover:text-gray-700{% endif %}">
+    진행 중 <span class="ml-1 bg-purple-100 text-purple-700 text-xs px-1.5 py-0.5 rounded-full">{{ active_polls|length }}</span>
+  </a>
+  <a href="?tab=ended"
+     class="px-4 py-2 text-sm font-medium border-b-2 transition
+       {% if tab == 'ended' %}border-purple-600 text-purple-700{% else %}border-transparent text-gray-500 hover:text-gray-700{% endif %}">
+    종료됨 <span class="ml-1 bg-gray-100 text-gray-600 text-xs px-1.5 py-0.5 rounded-full">{{ ended_polls|length }}</span>
+  </a>
+</div>
+
+<!-- 투표 목록 -->
+{% if tab == 'active' %}
+  {% with poll_list=active_polls %}
+  {% include 'polls/_poll_cards.html' with polls=poll_list empty_msg="진행 중인 투표가 없습니다." %}
+  {% endwith %}
+{% else %}
+  {% with poll_list=ended_polls %}
+  {% include 'polls/_poll_cards.html' with polls=poll_list empty_msg="종료된 투표가 없습니다." %}
+  {% endwith %}
+{% endif %}
+{% endblock %}

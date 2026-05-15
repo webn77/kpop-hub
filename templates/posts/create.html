@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}글쓰기 | KPOP HUB{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+    <h1 class="text-xl font-bold text-gray-800 mb-6">✏️ 새 글 작성</h1>
+
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form|crispy }}
+      <div class="flex gap-3 justify-end mt-6">
+        <a href="{% url 'posts:list' %}"
+           class="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
+          취소
+        </a>
+        <button type="submit"
+                class="bg-purple-600 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition">
+          게시하기
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

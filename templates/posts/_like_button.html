@@ -1,0 +1,11 @@
+<button id="like-btn-{{ post.pk }}"
+        {% if user.is_authenticated %}
+          hx-post="{% url 'posts:like' post.pk %}"
+          hx-target="#like-btn-{{ post.pk }}"
+          hx-swap="outerHTML"
+        {% endif %}
+        class="flex items-center gap-1 px-4 py-2 rounded-full border text-sm font-medium transition
+          {% if user_liked %}bg-red-50 border-red-300 text-red-500 hover:bg-red-100
+          {% else %}bg-white border-gray-200 text-gray-500 hover:bg-gray-50{% endif %}">
+  {% if user_liked %}❤{% else %}🤍{% endif %} {{ post.like_count }}
+</button>

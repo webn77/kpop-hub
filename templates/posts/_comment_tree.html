@@ -1,0 +1,65 @@
+{% load mptt_tags %}
+
+<div id="comment-tree">
+{% recursetree comments %}
+  <div class="{% if not node.is_root_node %}ml-8 border-l-2 border-purple-100 pl-4{% endif %} mb-3">
+    <div class="bg-gray-50 rounded-lg p-3">
+      <div class="flex items-center justify-between mb-1">
+        <span class="text-sm font-medium text-gray-700">
+          {{ node.author.nickname|default:node.author.username }}
+        </span>
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-gray-400">{{ node.created_at|date:"Y.m.d H:i" }}</span>
+          {% if user.is_authenticated and not node.is_root_node == False %}
+            <button
+              hx-post="{% url 'posts:comment_create' post.pk %}"
+              hx-target="#comment-tree"
+              hx-swap="outerHTML"
+              hx-vals='{"parent_id": "{{ node.pk }}", "content": ""}'
+              onclick="document.getElementById('reply-form-{{ node.pk }}').classList.toggle('hidden'); return false;"
+              class="text-xs text-purple-500 hover:underline">
+              답글
+            </button>
+          {% endif %}
+          {% if user == node.author %}
+            <button
+              hx-post="{% url 'posts:comment_delete' node.pk %}"
+              hx-target="#comment-tree"
+              hx-swap="outerHTML"
+              hx-confirm="댓글을 삭제할까요?"
+              class="text-xs text-red-400 hover:underline">
+              삭제
+            </button>
+          {% endif %}
+        </div>
+      </div>
+      <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ node.content }}</p>
+    </div>
+
+    <!-- 대댓글 입력 폼 -->
+    {% if user.is_authenticated %}
+    <div id="reply-form-{{ node.pk }}" class="hidden mt-2 ml-4">
+      <form hx-post="{% url 'posts:comment_create' post.pk %}"
+            hx-target="#comment-tree"
+            hx-swap="outerHTML"
+            class="flex gap-2">
+        {% csrf_token %}
+        <input type="hidden" name="parent_id" value="{{ node.pk }}">
+        <textarea name="content"
+                  placeholder="답글을 입력하세요"
+                  rows="2"
+                  class="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-purple-300"></textarea>
+        <button type="submit"
+                class="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm hover:bg-purple-700 transition self-end">
+          등록
+        </button>
+      </form>
+    </div>
+    {% endif %}
+
+    {% if not node.is_leaf_node %}
+      {{ children }}
+    {% endif %}
+  </div>
+{% endrecursetree %}
+</div>

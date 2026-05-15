@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}게시글 삭제 | KPOP HUB{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+  <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 text-center">
+    <p class="text-4xl mb-4">🗑️</p>
+    <h1 class="text-lg font-bold text-gray-800 mb-2">게시글을 삭제할까요?</h1>
+    <p class="text-gray-500 text-sm mb-6">
+      「{{ object.title }}」을 삭제하면 복구할 수 없습니다.
+    </p>
+    <form method="post" class="flex gap-3 justify-center">
+      {% csrf_token %}
+      <a href="{% url 'posts:detail' object.pk %}"
+         class="px-5 py-2 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition">
+        취소
+      </a>
+      <button type="submit"
+              class="bg-red-500 text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-red-600 transition">
+        삭제
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

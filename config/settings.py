@@ -107,10 +107,16 @@ AUTHENTICATION_BACKENDS = [
 
 SITE_ID = 1
 
+LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 ACCOUNT_LOGIN_BY_CODE_ENABLED = False
+# allauth 0.65+ 방식: 로그인 실패 5회 제한 (300초 잠금)
+ACCOUNT_RATE_LIMITS = {
+    'login_failed': '5/300s',
+}
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
 
 # ───────────────────────────────────────────────
 # Password validation

@@ -20,16 +20,20 @@
 
       <!-- 데스크탑 메뉴 -->
       <div class="hidden md:flex items-center gap-4 text-sm">
-        <a href="/" class="hover:text-purple-200 transition">홈</a>
-        <a href="/notices/" class="hover:text-purple-200 transition">공지사항</a>
-        <a href="/posts/" class="hover:text-purple-200 transition">소통 공간</a>
-        <a href="/events/" class="hover:text-purple-200 transition">이벤트</a>
+        <a href="{% url 'posts:list' %}" class="hover:text-purple-200 transition">홈</a>
+        <a href="{% url 'notices:list' %}" class="hover:text-purple-200 transition">공지사항</a>
+        <a href="{% url 'posts:list' %}" class="hover:text-purple-200 transition">소통 공간</a>
+        <a href="{% url 'events:list' %}" class="hover:text-purple-200 transition">이벤트</a>
+        <a href="{% url 'polls:list' %}" class="hover:text-purple-200 transition">투표</a>
         {% if user.is_authenticated %}
-          <span class="text-purple-300">{{ user.username }}</span>
-          <a href="{% url 'account_logout' %}" class="bg-white text-purple-700 px-3 py-1 rounded hover:bg-purple-100 transition">로그아웃</a>
+          <a href="{% url 'accounts:profile' %}" class="text-purple-300 hover:text-white transition">{{ user.nickname|default:user.username }}</a>
+          <form method="post" action="{% url 'accounts:logout' %}" class="inline">
+            {% csrf_token %}
+            <button type="submit" class="bg-white text-purple-700 px-3 py-1 rounded hover:bg-purple-100 transition">로그아웃</button>
+          </form>
         {% else %}
-          <a href="{% url 'account_login' %}" class="hover:text-purple-200 transition">로그인</a>
-          <a href="{% url 'account_signup' %}" class="bg-white text-purple-700 px-3 py-1 rounded hover:bg-purple-100 transition">회원가입</a>
+          <a href="{% url 'accounts:login' %}" class="hover:text-purple-200 transition">로그인</a>
+          <a href="{% url 'accounts:signup' %}" class="bg-white text-purple-700 px-3 py-1 rounded hover:bg-purple-100 transition">회원가입</a>
         {% endif %}
       </div>
 
@@ -69,23 +73,29 @@
 
   <!-- 모바일 하단 네비게이션 -->
   <nav class="md:hidden fixed bottom-0 inset-x-0 bg-white border-t flex justify-around py-2 shadow-lg z-50">
-    <a href="/" class="flex flex-col items-center text-xs text-gray-500 hover:text-purple-700">
+    <a href="{% url 'posts:list' %}" class="flex flex-col items-center text-xs text-gray-500 hover:text-purple-700">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0h6"/>
       </svg>
       홈
     </a>
-    <a href="/posts/" class="flex flex-col items-center text-xs text-gray-500 hover:text-purple-700">
+    <a href="{% url 'posts:list' %}" class="flex flex-col items-center text-xs text-gray-500 hover:text-purple-700">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v10a2 2 0 01-2 2z"/>
       </svg>
       게시판
     </a>
-    <a href="/events/" class="flex flex-col items-center text-xs text-gray-500 hover:text-purple-700">
+    <a href="{% url 'events:list' %}" class="flex flex-col items-center text-xs text-gray-500 hover:text-purple-700">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
       </svg>
       이벤트
+    </a>
+    <a href="{% url 'polls:list' %}" class="flex flex-col items-center text-xs text-gray-500 hover:text-purple-700">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+      </svg>
+      투표
     </a>
     {% if user.is_authenticated %}
     <a href="/accounts/profile/" class="flex flex-col items-center text-xs text-gray-500 hover:text-purple-700">
@@ -95,7 +105,7 @@
       내정보
     </a>
     {% else %}
-    <a href="{% url 'account_login' %}" class="flex flex-col items-center text-xs text-gray-500 hover:text-purple-700">
+    <a href="{% url 'accounts:login' %}" class="flex flex-col items-center text-xs text-gray-500 hover:text-purple-700">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
       </svg>

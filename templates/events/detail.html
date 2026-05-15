@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}{{ event.title }} — KPOP HUB{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto space-y-4">
+
+  <!-- 뒤로가기 -->
+  <a href="{% url 'events:list' %}" class="text-sm text-purple-600 hover:underline">← 이벤트 목록</a>
+
+  <!-- 카드 -->
+  <div class="bg-white rounded-xl shadow-sm p-6 space-y-4">
+
+    <!-- 유형 배지 + 아티스트 -->
+    <div class="flex items-center gap-2">
+      <span class="text-sm px-3 py-1 rounded-full font-medium
+        {% if event.event_type == 'comeback' %}bg-pink-100 text-pink-700
+        {% elif event.event_type == 'concert' %}bg-purple-100 text-purple-700
+        {% elif event.event_type == 'fansign' %}bg-yellow-100 text-yellow-700
+        {% else %}bg-gray-100 text-gray-600{% endif %}">
+        {{ event.get_event_type_display }}
+      </span>
+      {% if event.artist %}
+        <span class="text-sm text-gray-500 font-medium">{{ event.artist }}</span>
+      {% endif %}
+    </div>
+
+    <!-- 제목 -->
+    <h1 class="text-2xl font-bold text-gray-800">{{ event.title }}</h1>
+
+    <!-- 날짜 -->
+    <div class="flex items-center gap-2 text-purple-600">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+      </svg>
+      <span class="font-semibold">{{ event.event_date|date:"Y년 m월 d일 (D)" }}</span>
+    </div>
+
+    <!-- 설명 -->
+    {% if event.description %}
+      <div class="border-t pt-4">
+        <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">{{ event.description }}</p>
+      </div>
+    {% endif %}
+
+    <!-- 메타 -->
+    <div class="border-t pt-4 text-xs text-gray-400 flex items-center justify-between">
+      <span>등록: {{ event.created_by.nickname|default:event.created_by.username }}</span>
+      <span>{{ event.created_at|date:"Y-m-d H:i" }}</span>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

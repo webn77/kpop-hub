@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ poll.title }} — KPOP HUB{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <a href="{% url 'polls:list' %}" class="text-sm text-purple-600 hover:underline">&larr; 투표 목록</a>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+  <!-- 헤더 -->
+  <div class="flex items-start justify-between gap-3 mb-2">
+    <h1 class="text-xl font-bold text-gray-800">{{ poll.title }}</h1>
+    {% if poll.is_active %}
+      <span class="shrink-0 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full font-medium">진행 중</span>
+    {% else %}
+      <span class="shrink-0 text-xs bg-gray-100 text-gray-500 px-2 py-1 rounded-full font-medium">종료</span>
+    {% endif %}
+  </div>
+
+  {% if poll.description %}
+  <p class="text-sm text-gray-500 mb-4">{{ poll.description }}</p>
+  {% endif %}
+
+  <div class="text-xs text-gray-400 mb-6 flex gap-4">
+    <span>마감: {{ poll.end_date|date:"Y-m-d H:i" }}</span>
+    <span>총 {{ poll.total_votes }}표</span>
+    {% if poll.is_multiple %}<span class="text-blue-500">복수선택 가능</span>{% endif %}
+  </div>
+
+  <!-- 투표 폼 (미투표 + 진행 중) -->
+  {% if not show_result %}
+  <form method="post" action="{% url 'polls:vote' poll.pk %}">
+    {% csrf_token %}
+    <div class="space-y-3 mb-6">
+      {% for choice in poll.choices.all %}
+      <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-purple-50 transition">
+        {% if poll.is_multiple %}
+          <input type="checkbox" name="choices" value="{{ choice.pk }}"
+                 class="w-4 h-4 text-purple-600 rounded">
+        {% else %}
+          <input type="radio" name="choice" value="{{ choice.pk }}"
+                 class="w-4 h-4 text-purple-600">
+        {% endif %}
+        <span class="text-sm text-gray-700">{{ choice.text }}</span>
+      </label>
+      {% endfor %}
+    </div>
+    <button type="submit"
+            class="w-full bg-purple-600 text-white py-2.5 rounded-lg font-medium hover:bg-purple-700 transition">
+      투표하기
+    </button>
+  </form>
+
+  {% else %}
+  <!-- 결과 바 차트 -->
+  <div class="space-y-4 mb-4">
+    {% for choice in poll.choices.all %}
+    <div>
+      <div class="flex justify-between text-sm mb-1">
+        <span class="text-gray-700 font-medium">{{ choice.text }}</span>
+        <span class="text-gray-500">{{ choice.vote_count }}표 ({{ choice.vote_percentage }}%)</span>
+      </div>
+      <div class="w-full bg-gray-100 rounded h-4 overflow-hidden">
+        <div style="width:{{ choice.vote_percentage }}%" class="bg-violet-500 h-4 rounded transition-all duration-500"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if user_voted %}
+  <p class="text-center text-sm text-green-600 mt-4">이미 투표에 참여하셨습니다.</p>
+  {% endif %}
+
+  {% if not poll.is_active %}
+  <p class="text-center text-sm text-gray-400 mt-2">종료된 투표입니다.</p>
+  {% endif %}
+
+  {% if poll.is_active and not user_voted %}
+  <a href="{% url 'polls:detail' poll.pk %}"
+     class="block text-center text-sm text-purple-600 hover:underline mt-4">투표하기</a>
+  {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

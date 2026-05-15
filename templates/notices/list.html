@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}공지사항 — KPOP HUB{% endblock %}
+
+{% block content %}
+<div class="space-y-4">
+  <!-- 헤더 -->
+  <div class="flex items-center justify-between">
+    <h1 class="text-2xl font-bold text-purple-700">공지사항</h1>
+    {% if user.is_staff or user.role == 'ADMIN' %}
+      <a href="{% url 'notices:create' %}"
+         class="bg-purple-700 text-white px-4 py-2 rounded hover:bg-purple-800 transition text-sm">
+        + 공지 작성
+      </a>
+    {% endif %}
+  </div>
+
+  <!-- 목록 -->
+  {% if notices %}
+    <div class="space-y-2">
+      {% for notice in notices %}
+        <a href="{% url 'notices:detail' notice.pk %}"
+           class="block bg-white border rounded-lg p-4 shadow-sm hover:shadow-md transition">
+          <div class="flex items-center gap-2">
+            {% if notice.is_pinned %}
+              <span class="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded font-semibold">📌 고정</span>
+            {% endif %}
+            <span class="font-medium text-gray-800 truncate">{{ notice.title }}</span>
+          </div>
+          <div class="mt-1 text-xs text-gray-400 flex gap-3">
+            <span>{{ notice.author }}</span>
+            <span>{{ notice.created_at|date:"Y.m.d" }}</span>
+            <span>조회 {{ notice.view_count }}</span>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+
+    <!-- 페이지네이션 -->
+    {% if is_paginated %}
+      <div class="flex justify-center gap-1 mt-4 text-sm">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}"
+             class="px-3 py-1 border rounded hover:bg-gray-100">&laquo;</a>
+        {% endif %}
+        <span class="px-3 py-1 border rounded bg-purple-700 text-white">
+          {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+        </span>
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}"
+             class="px-3 py-1 border rounded hover:bg-gray-100">&raquo;</a>
+        {% endif %}
+      </div>
+    {% endif %}
+
+  {% else %}
+    <p class="text-center text-gray-400 py-12">등록된 공지사항이 없습니다.</p>
+  {% endif %}
+</div>
+{% endblock %}
