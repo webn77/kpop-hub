@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}개인 응답 상세 — {{ survey.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-xl font-bold text-gray-800">{{ survey.title }}</h1>
+      <p class="text-sm text-gray-500 mt-1">
+        응답자:
+        {% if survey.is_anonymous %}
+          익명
+        {% else %}
+          {{ response.respondent|default:"익명" }}
+        {% endif %}
+        · 제출: {{ response.submitted_at|date:"Y-m-d H:i" }}
+      </p>
+    </div>
+    <a href="{% url 'surveys:results' survey.pk %}" class="text-sm text-purple-600 hover:underline">← 결과로</a>
+  </div>
+
+  <div class="space-y-4">
+    {% for pair in answer_pairs %}
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        <p class="text-sm font-medium text-gray-700 mb-2">
+          {{ forloop.counter }}. {{ pair.question.text }}
+        </p>
+        <div class="bg-gray-50 rounded px-3 py-2 text-sm text-gray-700">
+          {% if pair.answer.answer_text %}
+            {{ pair.answer.answer_text }}
+          {% else %}
+            <span class="text-gray-400">응답 없음</span>
+          {% endif %}
+        </div>
+      </div>
+    {% empty %}
+      <p class="text-gray-400">답변이 없습니다.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

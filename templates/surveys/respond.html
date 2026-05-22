@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}{{ survey.title }} — 설문 응답{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">{{ survey.title }}</h1>
+    {% if survey.description %}
+      <p class="text-gray-500 mt-2">{{ survey.description }}</p>
+    {% endif %}
+    {% if survey.expires_at %}
+      <p class="text-xs text-gray-400 mt-1">마감: {{ survey.expires_at|date:"Y-m-d H:i" }}</p>
+    {% endif %}
+  </div>
+
+  <form method="post" class="space-y-6">
+    {% csrf_token %}
+    {% for question in survey.questions.all %}
+      {% with field_name="question_"|add:question.pk|stringformat:"d" %}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+          <p class="font-medium text-gray-800 mb-3">
+            {{ forloop.counter }}. {{ question.text }}
+            {% if question.required %}<span class="text-red-500 ml-1">*</span>{% endif %}
+          </p>
+
+          {% if question.question_type == "TEXT" %}
+            <input type="text" name="{{ field_name }}"
+              class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-300"
+              {% if question.required %}required{% endif %}>
+
+          {% elif question.question_type == "TEXTAREA" %}
+            <textarea name="{{ field_name }}" rows="4"
+              class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-300"
+              {% if question.required %}required{% endif %}></textarea>
+
+          {% elif question.question_type == "CHOICE" %}
+            <div class="space-y-2">
+              {% for opt in question.options %}
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="{{ field_name }}" value="{{ opt }}"
+                    class="accent-purple-600"
+                    {% if question.required %}required{% endif %}>
+                  <span class="text-gray-700">{{ opt }}</span>
+                </label>
+              {% endfor %}
+            </div>
+
+          {% elif question.question_type == "MULTIPLE" %}
+            <div class="space-y-2">
+              {% for opt in question.options %}
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" name="{{ field_name }}" value="{{ opt }}"
+                    class="accent-purple-600">
+                  <span class="text-gray-700">{{ opt }}</span>
+                </label>
+              {% endfor %}
+            </div>
+
+          {% elif question.question_type == "SCALE" %}
+            <div class="flex gap-4 mt-1">
+              {% for i in "12345" %}
+                <label class="flex flex-col items-center gap-1 cursor-pointer">
+                  <input type="radio" name="{{ field_name }}" value="{{ i }}"
+                    class="accent-purple-600"
+                    {% if question.required %}required{% endif %}>
+                  <span class="text-sm text-gray-600">{{ i }}</span>
+                </label>
+              {% endfor %}
+            </div>
+            <div class="flex justify-between text-xs text-gray-400 mt-1">
+              <span>매우 아님</span><span>매우 그렇다</span>
+            </div>
+          {% endif %}
+        </div>
+      {% endwith %}
+    {% endfor %}
+
+    <div class="flex gap-3">
+      <button type="submit" class="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-700 transition font-medium">제출하기</button>
+      <a href="{% url 'surveys:list' %}" class="bg-gray-100 text-gray-700 px-4 py-2 rounded hover:bg-gray-200 transition">취소</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

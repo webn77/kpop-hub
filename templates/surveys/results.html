@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}{{ survey.title }} — 결과{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">{{ survey.title }}</h1>
+      <p class="text-sm text-gray-500 mt-1">총 응답 {{ survey.response_count }}명</p>
+    </div>
+    <a href="{% url 'surveys:list' %}" class="text-sm text-purple-600 hover:underline">← 목록</a>
+  </div>
+
+  <!-- 질문별 통계 -->
+  <div class="space-y-6 mb-10">
+    {% for stat in stats %}
+      <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        <p class="font-medium text-gray-800 mb-4">
+          {{ forloop.counter }}. {{ stat.question.text }}
+          <span class="text-xs text-gray-400 ml-2">({{ stat.question.get_question_type_display }})</span>
+        </p>
+
+        {% if stat.question.question_type in "CHOICE MULTIPLE" %}
+          <!-- 객관식: CSS 막대 그래프 -->
+          <div class="space-y-2">
+            {% for opt_stat in stat.option_stats %}
+              <div>
+                <div class="flex justify-between text-sm text-gray-700 mb-1">
+                  <span>{{ opt_stat.option }}</span>
+                  <span>{{ opt_stat.count }}명 ({{ opt_stat.percent }}%)</span>
+                </div>
+                <div class="w-full bg-gray-100 rounded-full h-4 overflow-hidden">
+                  <div class="bg-purple-500 h-4 rounded-full transition-all"
+                    style="width: {{ opt_stat.percent }}%"></div>
+                </div>
+              </div>
+            {% empty %}
+              <p class="text-sm text-gray-400">응답 없음</p>
+            {% endfor %}
+          </div>
+
+        {% elif stat.question.question_type == "SCALE" %}
+          <!-- 척도: 평균 -->
+          <div class="flex items-center gap-4">
+            <div class="text-4xl font-bold text-purple-600">{{ stat.scale_avg }}</div>
+            <div class="text-sm text-gray-500">/ 5.0<br><span class="text-xs">{{ stat.answer_count }}명 응답</span></div>
+          </div>
+
+        {% else %}
+          <!-- 주관식: 답변 목록 -->
+          <ul class="space-y-2">
+            {% for answer in stat.answers %}
+              {% if answer.answer_text %}
+                <li class="bg-gray-50 rounded px-3 py-2 text-sm text-gray-700">{{ answer.answer_text }}</li>
+              {% endif %}
+            {% empty %}
+              <li class="text-sm text-gray-400">응답 없음</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- 개인별 응답 목록 -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+    <h2 class="font-semibold text-gray-700 mb-4">개인별 응답</h2>
+    {% if responses %}
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b text-left text-gray-500">
+            <th class="pb-2 pr-4">응답자</th>
+            <th class="pb-2 pr-4">제출일</th>
+            <th class="pb-2">상세</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for resp in responses %}
+            <tr>
+              <td class="py-2 pr-4 text-gray-700">
+                {% if survey.is_anonymous %}익명{% else %}{{ resp.respondent|default:"익명" }}{% endif %}
+              </td>
+              <td class="py-2 pr-4 text-gray-500">{{ resp.submitted_at|date:"Y-m-d H:i" }}</td>
+              <td class="py-2">
+                <a href="{% url 'surveys:response_detail' survey.pk resp.pk %}"
+                  class="text-purple-600 hover:underline">보기</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="text-sm text-gray-400">아직 응답이 없습니다.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

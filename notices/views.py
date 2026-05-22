@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import (
     CreateView,
@@ -20,6 +21,10 @@ class StaffRequiredMixin(UserPassesTestMixin):
         return user.is_authenticated and (
             user.is_staff or getattr(user, 'role', '') == 'ADMIN'
         )
+
+    def handle_no_permission(self):
+        messages.error(self.request, '관리자만 접근할 수 있는 페이지입니다.')
+        return redirect(self.request.META.get('HTTP_REFERER', '/'))
 
 
 class NoticeListView(ListView):

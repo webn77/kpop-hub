@@ -15,5 +15,7 @@ urlpatterns = [
     path('notices/', include('notices.urls', namespace='notices')),
     path('events/', include('events.urls', namespace='events')),
     path('polls/', include('polls.urls', namespace='polls')),
+    path('surveys/', include('surveys.urls', namespace='surveys')),
+    path('search/', include('search.urls', namespace='search')),
     path('', include('posts.urls', namespace='posts')),        # 메인 = 게시판
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,12 +1,26 @@
 import calendar
 from datetime import date
 
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView, DetailView, CreateView
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.shortcuts import redirect
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 
 from .models import Event
 from .forms import EventForm
+
+
+class StaffRequiredMixin(UserPassesTestMixin):
+    def test_func(self):
+        user = self.request.user
+        return user.is_authenticated and (
+            user.is_staff or getattr(user, 'role', '') == 'ADMIN'
+        )
+
+    def handle_no_permission(self):
+        messages.error(self.request, '관리자만 일정을 관리할 수 있습니다.')
+        return redirect(self.request.META.get('HTTP_REFERER', '/'))
 
 
 class EventListView(ListView):
@@ -73,7 +87,7 @@ class EventDetailView(DetailView):
     context_object_name = 'event'
 
 
-class EventCreateView(LoginRequiredMixin, CreateView):
+class EventCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
     model = Event
     form_class = EventForm
     template_name = 'events/event_form.html'
@@ -81,4 +95,5 @@ class EventCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.created_by = self.request.user
+        messages.success(self.request, '일정이 등록되었습니다.')
         return super().form_valid(form)

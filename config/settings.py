@@ -13,8 +13,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ───────────────────────────────────────────────
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
-CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS if h not in ('localhost', '127.0.0.1')]
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') + ['.ngrok-free.app', '.ngrok-free.dev']
+CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS if h not in ('localhost', '127.0.0.1')] + ['https://*.ngrok-free.app', 'https://*.ngrok-free.dev']
 
 # ───────────────────────────────────────────────
 # Application definition
@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'events',
     'polls',
     'surveys',
+    'search',
     'admin_dashboard',
 ]
 

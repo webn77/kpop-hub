@@ -1,6 +1,7 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import F
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 from django.urls import reverse_lazy
@@ -17,7 +18,7 @@ class PostListView(ListView):
     model = Post
     template_name = 'posts/list.html'
     context_object_name = 'posts'
-    paginate_by = 10
+    paginate_by = 15
 
     def get_queryset(self):
         return Post.objects.select_related('author').prefetch_related('likes', 'comments')
@@ -76,6 +77,10 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     def test_func(self):
         return self.get_object().author == self.request.user
 
+    def handle_no_permission(self):
+        messages.error(self.request, '본인의 게시글만 수정할 수 있습니다.')
+        return redirect(self.request.META.get('HTTP_REFERER', '/'))
+
     def get_success_url(self):
         return reverse_lazy('posts:detail', kwargs={'pk': self.object.pk})
 
@@ -87,6 +92,10 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         return self.get_object().author == self.request.user
+
+    def handle_no_permission(self):
+        messages.error(self.request, '본인의 게시글만 삭제할 수 있습니다.')
+        return redirect(self.request.META.get('HTTP_REFERER', '/'))
 
 
 class PostLikeView(LoginRequiredMixin, View):
@@ -141,9 +150,13 @@ class CommentDeleteView(LoginRequiredMixin, View):
 
     def post(self, request, pk):
         comment = get_object_or_404(Comment, pk=pk)
+        if comment.author != request.user:
+            return HttpResponse(
+                '<p class="text-red-500 text-sm px-4 py-2">본인의 댓글만 삭제할 수 있습니다.</p>',
+                status=403,
+            )
         post = comment.post
-        if comment.author == request.user:
-            comment.delete()
+        comment.delete()
         comments = post.comments.filter(
             parent=None
         ).select_related('author').prefetch_related('children__author')
