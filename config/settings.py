@@ -50,9 +50,11 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'cloudinary_storage',
     'django.contrib.staticfiles',
     'django.contrib.sites',
     # Third-party
+    'cloudinary',
     'allauth',
     'allauth.account',
     'crispy_forms',
@@ -177,10 +179,22 @@ USE_TZ = True
 # ───────────────────────────────────────────────
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# 저장소: 로컬은 파일시스템 + 정적은 whitenoise.
+# 운영(not DEBUG)은 업로드 미디어를 Cloudinary로 영구 저장 (Render 무료=휘발성 디스크 대응).
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
+if not DEBUG:
+    STORAGES['default']['BACKEND'] = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # ───────────────────────────────────────────────
 # Crispy Forms
