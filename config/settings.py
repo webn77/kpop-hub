@@ -5,6 +5,8 @@ Django settings for KPOP HUB project.
 import os
 from pathlib import Path
 
+import dj_database_url
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -12,9 +14,32 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Security — environment variable overrides
 # ───────────────────────────────────────────────
 SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') + ['.ngrok-free.app', '.ngrok-free.dev']
-CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS if h not in ('localhost', '127.0.0.1')] + ['https://*.ngrok-free.app', 'https://*.ngrok-free.dev']
+# Render 운영 환경에서는 자동으로 DEBUG=False (로컬은 True 유지)
+DEBUG = 'RENDER' not in os.environ
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+if DEBUG:
+    # 개발 환경에서만 ngrok 터널 도메인 허용 (운영 공격면 축소)
+    ALLOWED_HOSTS += ['.ngrok-free.app', '.ngrok-free.dev']
+# Render가 주입하는 외부 호스트명 자동 허용
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+CSRF_TRUSTED_ORIGINS = [f"https://{h}" for h in ALLOWED_HOSTS if h not in ('localhost', '127.0.0.1')] + ['https://*.onrender.com']
+if DEBUG:
+    CSRF_TRUSTED_ORIGINS += ['https://*.ngrok-free.app', 'https://*.ngrok-free.dev']
+
+# ───────────────────────────────────────────────
+# 운영 환경 보안 헤더 (Render — DEBUG=False일 때만)
+# ───────────────────────────────────────────────
+if not DEBUG:
+    # Render는 리버스 프록시 뒤에 있으므로 프록시 헤더로 HTTPS 인식 (리다이렉트 루프 방지)
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000  # 1년
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 # ───────────────────────────────────────────────
 # Application definition
@@ -81,21 +106,30 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # ───────────────────────────────────────────────
 # Database — SQLite with WAL optimisation
 # ───────────────────────────────────────────────
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-        'OPTIONS': {
-            'timeout': 20,
-            'init_command': (
-                'PRAGMA journal_mode=WAL; '
-                'PRAGMA synchronous=NORMAL; '
-                'PRAGMA foreign_keys=ON; '
-                'PRAGMA busy_timeout=20000;'
-            ),
-        },
+# DATABASE_URL 환경변수가 있으면 PostgreSQL(Render), 없으면 로컬 SQLite 사용
+if os.environ.get('DATABASE_URL'):
+    DATABASES = {
+        'default': dj_database_url.config(
+            conn_max_age=600,
+            ssl_require=True,
+        )
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+            'OPTIONS': {
+                'timeout': 20,
+                'init_command': (
+                    'PRAGMA journal_mode=WAL; '
+                    'PRAGMA synchronous=NORMAL; '
+                    'PRAGMA foreign_keys=ON; '
+                    'PRAGMA busy_timeout=20000;'
+                ),
+            },
+        }
+    }
 
 # ───────────────────────────────────────────────
 # Authentication

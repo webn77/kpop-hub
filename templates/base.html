@@ -22,10 +22,15 @@
       <div class="hidden md:flex items-center gap-4 text-sm">
         <a href="{% url 'posts:list' %}" class="hover:text-purple-200 transition">홈</a>
         <a href="{% url 'notices:list' %}" class="hover:text-purple-200 transition">공지사항</a>
-        <a href="{% url 'posts:list' %}" class="hover:text-purple-200 transition">소통 공간</a>
+        <a href="{% url 'posts:list' %}" class="hover:text-purple-200 transition">소통공간</a>
         <a href="{% url 'events:list' %}" class="hover:text-purple-200 transition">이벤트</a>
         <a href="{% url 'polls:list' %}" class="hover:text-purple-200 transition">투표</a>
+        <a href="{% url 'surveys:list' %}" class="hover:text-purple-200 transition">설문조사</a>
+        <a href="{% url 'search:search' %}" class="hover:text-purple-200 transition">검색</a>
         {% if user.is_authenticated %}
+          {% if user.is_staff %}
+            <a href="/admin/" class="bg-yellow-400 text-purple-900 px-3 py-1 rounded hover:bg-yellow-300 transition font-semibold text-xs">관리자</a>
+          {% endif %}
           <a href="{% url 'accounts:profile' %}" class="text-purple-300 hover:text-white transition">{{ user.nickname|default:user.username }}</a>
           <form method="post" action="{% url 'accounts:logout' %}" class="inline">
             {% csrf_token %}

@@ -34,6 +34,7 @@ staticfiles/
 *.swp
 *.swo
 .DS_Store
+.claude/
 
 # Testing
 .coverage

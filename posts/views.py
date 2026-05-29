@@ -44,9 +44,7 @@ class PostDetailView(DetailView):
     def get_context_data(self, **kwargs):
         ctx = super().get_context_data(**kwargs)
         ctx['comment_form'] = CommentForm()
-        ctx['comments'] = self.object.comments.filter(
-            parent=None
-        ).select_related('author').prefetch_related('children__author')
+        ctx['comments'] = self.object.comments.select_related('author')
         if self.request.user.is_authenticated:
             ctx['user_liked'] = Like.objects.filter(
                 user=self.request.user, post=self.object
@@ -134,9 +132,7 @@ class CommentCreateView(LoginRequiredMixin, View):
                 except Comment.DoesNotExist:
                     comment.parent = None
             comment.save()
-        comments = post.comments.filter(
-            parent=None
-        ).select_related('author').prefetch_related('children__author')
+        comments = post.comments.select_related('author')
         html = render_to_string(
             'posts/_comment_tree.html',
             {'comments': comments, 'post': post},
@@ -157,9 +153,7 @@ class CommentDeleteView(LoginRequiredMixin, View):
             )
         post = comment.post
         comment.delete()
-        comments = post.comments.filter(
-            parent=None
-        ).select_related('author').prefetch_related('children__author')
+        comments = post.comments.select_related('author')
         html = render_to_string(
             'posts/_comment_tree.html',
             {'comments': comments, 'post': post},

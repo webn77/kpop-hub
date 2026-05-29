@@ -10,13 +10,10 @@
         </span>
         <div class="flex items-center gap-2">
           <span class="text-xs text-gray-400">{{ node.created_at|date:"Y.m.d H:i" }}</span>
-          {% if user.is_authenticated and not node.is_root_node == False %}
+          {% if user.is_authenticated and node.is_root_node %}
             <button
-              hx-post="{% url 'posts:comment_create' post.pk %}"
-              hx-target="#comment-tree"
-              hx-swap="outerHTML"
-              hx-vals='{"parent_id": "{{ node.pk }}", "content": ""}'
-              onclick="document.getElementById('reply-form-{{ node.pk }}').classList.toggle('hidden'); return false;"
+              type="button"
+              onclick="document.getElementById('reply-form-{{ node.pk }}').classList.toggle('hidden')"
               class="text-xs text-purple-500 hover:underline">
               답글
             </button>
