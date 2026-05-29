@@ -7,7 +7,7 @@ services:
     name: community-web
     runtime: python
     plan: free
-    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate --noinput"
+    buildCommand: "pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate --noinput && python manage.py ensure_superuser"
     startCommand: "gunicorn config.wsgi --bind 0.0.0.0:$PORT"
     envVars:
       - key: PYTHON_VERSION
@@ -18,3 +18,9 @@ services:
           property: connectionString
       - key: SECRET_KEY
         generateValue: true
+      - key: DJANGO_SUPERUSER_USERNAME
+        value: admin
+      - key: DJANGO_SUPERUSER_EMAIL
+        value: admin@kpophub.com
+      - key: DJANGO_SUPERUSER_PASSWORD
+        sync: false  # git에 저장 안 함 — Render 대시보드에서 직접 입력
